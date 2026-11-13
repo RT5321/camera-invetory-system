@@ -1,0 +1,497 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Role Management | AMN Camera Store</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background: #071322;
+            padding: 15px 25px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .logo small {
+            display: block;
+            color: #cfd8dc;
+            font-size: 12px;
+        }
+
+        .user {
+            color: white;
+            font-size: 16px;
+        }
+
+        .sidebar {
+    background: #071322;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+        .sidebar a {
+            display: block;
+            padding: 14px 20px;
+            color: #cfd8dc;
+            text-decoration: none;
+            transition: .3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #0d223a;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+            min-width: 0;
+        }
+
+        .card-box,
+        .table-box,
+        .role-area {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .07);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #071322;
+        }
+
+        .page-description {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #071322;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f5f9;
+        }
+
+        .manage-btn {
+            background: #071322;
+            color: white;
+            border-radius: 20px;
+            padding: 7px 16px;
+        }
+
+        .manage-btn:hover {
+            background: #0d223a;
+            color: white;
+        }
+
+        .role-area {
+            margin-top: 25px;
+        }
+
+        .role-title {
+            color: #071322;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .permission-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 13px 16px;
+            margin-bottom: 10px;
+        }
+
+        .permission-item:hover {
+            background: #eef3f8;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            color: #334155;
+        }
+
+        .btn-save {
+            background: #071322;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        .btn-save:hover {
+            background: #0d223a;
+            color: white;
+        }
+
+        footer {
+            background: #071322;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                min-height: auto;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .card-box,
+            .table-box,
+            .role-area {
+                padding: 17px;
+            }
+
+            .page-title {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<nav class="navbar d-flex justify-content-between align-items-center">
+    <div class="logo">
+        AMN Camera Store
+        <small>Addis Media Network</small>
+    </div>
+
+    <div class="user">
+        Welcome, <b>{{ request.user.username }}</b>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- SIDEBAR -->
+        <aside class="col-md-2 sidebar">
+            <a href="{% url 'admin_dashboard' %}">
+                Dashboard
+            </a>
+
+            <a href="{% url 'user_management' %}">
+               User Management
+            </a>
+
+            <a href="{% url 'role_management' %}" class="active">
+                Role Management
+            </a>
+
+            <a href="{% url 'admin_equipment_management' %}">
+Equipment <br>Management
+</a>
+
+            <a href="{% url 'admin_requests' %}">
+                Request 
+                Management
+            </a>
+
+            <a href="{% url 'admin_report' %}">
+               Reports
+            </a>
+
+            <a href="{% url 'logout' %}">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </a>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="col-md-10 content">
+
+            <div class="card-box mb-4">
+                <h2 class="page-title">
+                    <i class="bi bi-shield-lock"></i>
+                    User Role Management
+                </h2>
+                <p class="page-description">
+                    Manage dashboard navigation permissions for system users.
+                </p>
+            </div>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert
+                        {% if message.tags == 'error' %}
+                            alert-danger
+                        {% else %}
+                            alert-{{ message.tags }}
+                        {% endif %}
+                        alert-dismissible fade show" role="alert">
+
+                        {{ message }}
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- USERS TABLE -->
+            <div class="table-box">
+                <h5 class="mb-3">
+                    <i class="bi bi-people"></i> System Users
+                </h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Current Role</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email|default:"-" }}</td>
+
+                                    <td>
+                                        {% for group in user.groups.all %}
+                                            {% if group.name == "admin" %}
+                                                <span class="badge bg-danger">Admin</span>
+                                            {% elif group.name == "Store Keeper" %}
+                                                <span class="badge bg-success">Store Keeper</span>
+                                            {% elif group.name == "employee" %}
+                                                <span class="badge bg-primary">Employee</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    {{ group.name }}
+                                                </span>
+                                            {% endif %}
+                                        {% empty %}
+                                            <span class="badge bg-secondary">No Role</span>
+                                        {% endfor %}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'role_management' %}?user_id={{ user.id }}"
+                                           class="btn manage-btn btn-sm">
+                                            <i class="bi bi-gear"></i> Manage
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        No users found.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SELECTED USER PERMISSIONS -->
+            {% if selected_user %}
+                <div class="role-area">
+
+                    <h3 class="role-title">
+                        <i class="bi bi-person-gear"></i>
+                        Manage Permissions: {{ selected_user.username }}
+                    </h3>
+
+                    <p class="text-muted">
+                        The permission section below is selected automatically
+                        according to this user's role.
+                    </p>
+
+                    <hr>
+
+                    <form method="POST"
+                          action="{% url 'role_management' %}?user_id={{ selected_user.id }}">
+
+                        {% csrf_token %}
+
+                        <input type="hidden"
+                               name="user_id"
+                               value="{{ selected_user.id }}">
+
+                        <!-- EMPLOYEE PERMISSIONS -->
+                        {% if role_type == "employee" %}
+
+                            <h5 class="text-primary mb-3">
+                                <i class="bi bi-person"></i>
+                                Employee Navigation Permissions
+                            </h5>
+
+                            {% for item in employee_permissions %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="{{ item.field }}"
+                                               id="{{ item.field }}"
+                                               {% if item.checked %}checked{% endif %}>
+
+                                        <label class="form-check-label"
+                                               for="{{ item.field }}">
+                                            {{ item.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted">
+                                    No Employee permissions are configured.
+                                </p>
+                            {% endfor %}
+
+                        <!-- STOREKEEPER PERMISSIONS -->
+                        {% elif role_type == "storekeeper" %}
+
+                            <h5 class="text-success mb-3">
+                                <i class="bi bi-box-seam"></i>
+                                Store Keeper Navigation Permissions
+                            </h5>
+
+                            {% for item in storekeeper_permissions %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="{{ item.field }}"
+                                               id="{{ item.field }}"
+                                               {% if item.checked %}checked{% endif %}>
+
+                                        <label class="form-check-label"
+                                               for="{{ item.field }}">
+                                            {{ item.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted">
+                                    No Store Keeper permissions are configured.
+                                </p>
+                            {% endfor %}
+
+                        <!-- ADMIN PERMISSIONS -->
+                        {% elif role_type == "admin" %}
+
+                            <h5 class="text-danger mb-3">
+                                <i class="bi bi-shield-check"></i>
+                                Admin Navigation Permissions
+                            </h5>
+
+                            {% for item in admin_permissions %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="{{ item.field }}"
+                                               id="{{ item.field }}"
+                                               {% if item.checked %}checked{% endif %}>
+
+                                        <label class="form-check-label"
+                                               for="{{ item.field }}">
+                                            {{ item.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted">
+                                    No Admin permissions are configured.
+                                </p>
+                            {% endfor %}
+
+                        {% else %}
+
+                            <div class="alert alert-warning">
+                                This user does not belong to a recognized role group.
+                                Assign the correct Django group before managing permissions.
+                            </div>
+
+                        {% endif %}
+
+                        {% if role_type %}
+                            <hr>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-save">
+                                    <i class="bi bi-save"></i>
+                                    Save Permission
+                                </button>
+
+                                <a href="{% url 'role_management' %}"
+                                   class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        {% endif %}
+
+                    </form>
+                </div>
+
+            {% else %}
+
+                <div class="role-area text-center">
+                    <i class="bi bi-person-check"
+                       style="font-size: 40px; color: #64748b;"></i>
+
+                    <h5 class="mt-3">Select a User</h5>
+
+                    <p class="text-muted mb-0">
+                        Click Manage beside a user to display their permissions.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </main>
+    </div>
+</div>
+
+<footer>
+    © 2026 AMN Camera Store | Addis Media Network
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

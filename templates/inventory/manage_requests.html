@@ -1,0 +1,1276 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Manage Requests | AMN Camera Store</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+
+<style>
+
+body{
+    background:#f4f7fb;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+
+/* HEADER */
+
+.navbar{
+    background:#071322;
+    padding:12px 20px;
+}
+
+.navbar-brand{
+    color:white;
+    font-weight:bold;
+}
+
+.navbar-brand small{
+    display:block;
+    color:#cfd8dc;
+    font-size:12px;
+}
+
+
+/* SIDEBAR */
+
+.sidebar{
+    background:#071322;
+    min-height:100vh;
+    padding-top:20px;
+}
+
+.sidebar a{
+    display:block;
+    padding:14px 20px;
+    color:#cfd8dc;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    background:#0d223a;
+    color:white;
+}
+
+
+/* CONTENT */
+
+.content{
+    padding:25px;
+}
+
+
+/* TABLE */
+
+.table-box{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+
+/* SEARCH */
+
+.search-box{
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.06);
+}
+
+
+/* FOOTER */
+
+footer{
+    background:#071322;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+
+
+/* REJECT MODAL */
+
+.reason-box{
+    background:#f8f9fa;
+    border-radius:10px;
+    padding:15px;
+}
+
+.reason-item{
+    margin-bottom:12px;
+}
+.simple-modal {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.simple-modal-box {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.3);
+    overflow: hidden;
+}
+
+.simple-modal-header {
+    background: #dc3545;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.simple-modal-header h5 {
+    margin: 0;
+}
+
+.simple-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.simple-modal-body {
+    padding: 25px;
+}
+
+.simple-reason {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 45px;
+}
+
+.simple-modal-footer {
+    padding: 15px 20px;
+    text-align: right;
+    border-top: 1px solid #dee2e6;
+}
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<nav class="navbar d-flex justify-content-between align-items-center">
+
+    <div class="navbar-brand">
+
+        AMN Camera Store
+
+        <small>
+            Addis Media Network
+        </small>
+
+    </div>
+
+
+    <div class="text-white">
+
+        Welcome, {{ request.user.username }}
+
+    </div>
+
+</nav>
+
+
+
+<div class="container-fluid">
+
+<div class="row">
+
+
+<!-- SIDEBAR -->
+
+<div class="col-md-2 sidebar">
+
+
+<a href="{% url 'storekeeper_dashboard' %}">
+    
+    Dashboard
+</a>
+
+
+<a href="{% url 'manage_equipment' %}">
+  
+    Manage Equipment
+</a>
+
+
+<a href="{% url 'manage_requests' %}">
+   
+    Manage Requests
+</a>
+
+
+<a href="{% url 'storekeeper_return' %}">
+
+    Return Equipment
+</a>
+
+
+<a href="{% url 'report' %}">
+    
+    Report
+</a>
+
+
+<a href="{% url 'logout' %}">
+    <i class="bi bi-box-arrow-right"></i>
+    Logout
+</a>
+
+
+</div>
+
+
+
+<!-- CONTENT -->
+
+<div class="col-md-10 content">
+
+
+<h3 class="mb-4">
+
+    <i class="bi bi-list-check"></i>
+
+    Manage Equipment Requests
+
+</h3>
+
+
+
+<!-- SEARCH -->
+
+<div class="search-box mb-4">
+
+    <div class="input-group">
+
+        <span class="input-group-text bg-dark text-white">
+
+            <i class="bi bi-search"></i>
+
+        </span>
+
+
+        <input
+            type="text"
+            id="requestSearch"
+            class="form-control"
+            placeholder="Search by employee, equipment, department, status, priority, date..."
+        >
+
+    </div>
+
+</div>
+
+
+
+<!-- TABLE -->
+
+<div class="table-box">
+
+
+<table
+    class="table table-hover align-middle"
+    id="requestTable"
+>
+
+
+<thead class="table-dark">
+
+<tr>
+
+<th>Employee ID</th>
+
+<th>Employee</th>
+
+<th>Department</th>
+
+<th>Equipment</th>
+
+<th>Requested Qty</th>
+
+<th>Available Qty</th>
+
+<th>Borrow Date</th>
+
+<th>Return Date</th>
+
+<th>Priority</th>
+
+<th>Status</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+
+
+<tbody>
+
+
+{% for req in requests %}
+
+<tr>
+
+
+<!-- Employee ID -->
+
+<td>
+
+{{ req.employee_id }}
+
+</td>
+
+
+
+<!-- Employee -->
+
+<td>
+
+{{ req.user.username }}
+
+</td>
+
+
+
+<!-- Department -->
+
+<td>
+
+{{ req.department }}
+
+</td>
+
+
+
+<!-- Equipment -->
+
+<td>
+
+{% for item in req.request_items.all %}
+
+{{ item.equipment.name }}
+
+<br>
+
+{% endfor %}
+
+</td>
+
+
+
+<!-- Requested Quantity -->
+
+<td>
+
+{% for item in req.request_items.all %}
+
+{{ item.quantity }}
+
+<br>
+
+{% endfor %}
+
+</td>
+
+
+
+<!-- Available Quantity -->
+
+<td>
+
+{% for item in req.request_items.all %}
+
+{% if item.equipment.quantity >= item.quantity %}
+
+<span class="badge bg-success">
+
+{{ item.equipment.quantity }}
+
+Available
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+{{ item.equipment.quantity }}
+
+Low Stock
+
+</span>
+
+{% endif %}
+
+<br>
+
+{% endfor %}
+
+</td>
+
+
+
+<!-- Borrow Date -->
+
+<td>
+
+{{ req.borrow_date }}
+
+</td>
+
+
+
+<!-- Return Date -->
+
+<td>
+
+{{ req.return_date }}
+
+</td>
+
+
+
+<!-- Priority -->
+
+<td>
+
+{% if req.priority == "High" %}
+
+<span class="badge bg-danger">
+High
+</span>
+
+{% elif req.priority == "Normal" %}
+
+<span class="badge bg-warning text-dark">
+Normal
+</span>
+
+{% else %}
+
+<span class="badge bg-success">
+Low
+</span>
+
+{% endif %}
+
+</td>
+
+
+
+<!-- STATUS -->
+
+<td>
+
+{% if req.status == "Pending" %}
+
+<span class="badge bg-warning text-dark">
+Pending
+</span>
+
+{% elif req.status == "Approved" %}
+
+<span class="badge bg-success">
+Approved
+</span>
+
+{% elif req.status == "Rejected" %}
+
+<span class="badge bg-danger">
+Rejected
+</span>
+
+{% elif req.status == "Borrowed" %}
+
+<span class="badge bg-info">
+Borrowed
+</span>
+
+{% elif req.status == "Returned" %}
+
+<span class="badge bg-success">
+Returned
+</span>
+
+{% else %}
+
+<span class="badge bg-secondary">
+{{ req.status }}
+</span>
+
+{% endif %}
+
+</td>
+
+
+
+<!-- ACTION -->
+<!-- ACTION -->
+<td>
+
+    {% if req.status == "Pending" %}
+
+        <!-- APPROVE -->
+        <form
+            method="POST"
+            action="{% url 'approve_request' req.id %}"
+            style="display:inline;"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn btn-success btn-sm"
+            >
+                <i class="bi bi-check-circle"></i>
+                Approve
+            </button>
+        </form>
+
+        <!-- REJECT -->
+        <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#rejectModal"
+            onclick="setRejectRequest(
+                '{{ req.id }}',
+                '{{ req.user.username|escapejs }}'
+            )"
+        >
+            <i class="bi bi-x-circle"></i>
+            Reject
+        </button>
+
+
+    {% elif req.status == "Approved" %}
+
+        <!-- APPROVE - REMAINS VISIBLE -->
+        <button
+            type="button"
+            class="btn btn-success btn-sm"
+            disabled
+        >
+            <i class="bi bi-check-circle"></i>
+            Approved
+        </button>
+
+        <!-- BORROWED -->
+        <form
+            method="POST"
+            action="{% url 'process_checkout' req.id %}"
+            style="display:inline;"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn btn-primary btn-sm"
+            >
+                <i class="bi bi-box-arrow-right"></i>
+                Borrowed
+            </button>
+        </form>
+
+
+    {% elif req.status == "Rejected" %}
+
+        <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#requestModal"
+            onclick="showDetails(this)"
+            data-name="{{ req.user.username|escapejs }}"
+            data-reason="{{ req.rejection_reason|default:'No specific reason provided.'|escapejs }}"
+            data-rejection-message="{{ req.rejection_message|default:'No additional message.'|escapejs }}"
+        >
+            <i class="bi bi-eye"></i>
+            View Reason
+        </button>
+
+
+    {% elif req.status == "Borrowed" %}
+
+        <span class="badge bg-info">
+            <i class="bi bi-box-arrow-right"></i>
+            Borrowed
+        </span>
+
+
+    {% elif req.status == "Returned" %}
+
+        <span class="badge bg-success">
+            <i class="bi bi-check-circle"></i>
+            Returned
+        </span>
+
+
+    {% elif req.status == "Expired" %}
+
+        <span class="badge bg-secondary">
+            <i class="bi bi-clock"></i>
+            Expired
+        </span>
+
+
+    {% else %}
+
+        <span class="text-muted">
+            {{ req.status }}
+        </span>
+
+    {% endif %}
+
+</td>
+</tr>
+
+
+{% empty %}
+
+<tr>
+
+<td
+    colspan="11"
+    class="text-center text-muted"
+>
+
+No requests found
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+
+</tbody>
+
+</table>
+<div class="modal fade" id="requestModal" tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+
+                <h5 class="modal-title">
+                    <i class="bi bi-x-circle"></i>
+                    Rejection Information
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+                    <strong>Employee:</strong>
+                    <span id="viewEmployee"></span>
+                </p>
+
+                <hr>
+
+                <p>
+                    <strong>Reason:</strong>
+                </p>
+
+                <div class="alert alert-danger">
+                    <span id="viewReason"></span>
+                </div>
+
+                <p>
+                    <strong>Store Keeper Message:</strong>
+                </p>
+
+                <div class="alert alert-secondary">
+                    <span id="viewMessage"></span>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    data-bs-dismiss="modal">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- NO SEARCH RESULT -->
+
+<div
+    id="noSearchResult"
+    class="text-center text-muted"
+    style="display:none;"
+>
+
+<i class="bi bi-search"></i>
+
+No matching request found.
+
+</div>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ===================================== -->
+<!-- REJECT MODAL -->
+<!-- ===================================== -->
+
+<div
+    class="modal fade"
+    id="rejectModal"
+    tabindex="-1"
+>
+
+
+<div class="modal-dialog">
+
+
+<div class="modal-content">
+
+
+<!-- MODAL HEADER -->
+
+<div class="modal-header bg-danger text-white">
+
+<h5 class="modal-title">
+
+<i class="bi bi-x-circle"></i>
+
+Reject Equipment Request
+
+</h5>
+
+
+<button
+    type="button"
+    class="btn-close btn-close-white"
+    data-bs-dismiss="modal"
+>
+</button>
+
+</div>
+
+
+
+<!-- MODAL BODY -->
+
+<div class="modal-body">
+
+
+<p>
+
+You are rejecting the request from:
+
+<strong id="rejectEmployee"></strong>
+
+</p>
+
+
+<hr>
+
+
+<h6>
+Reason for rejection:
+</h6>
+
+
+<div class="reason-box">
+
+
+<!-- REASON 1 -->
+
+<div class="form-check reason-item">
+
+<input
+    class="form-check-input"
+    type="checkbox"
+    name="modal_reason"
+    value="Decrease your amount"
+    id="reason1"
+>
+
+<label
+    class="form-check-label"
+    for="reason1"
+>
+
+Decrease your amount
+
+</label>
+
+</div>
+
+
+
+<!-- REASON 2 -->
+
+<div class="form-check reason-item">
+
+<input
+    class="form-check-input"
+    type="checkbox"
+    name="modal_reason"
+    value="It is in maintenance"
+    id="reason2"
+>
+
+<label
+    class="form-check-label"
+    for="reason2"
+>
+
+It is in maintenance
+
+</label>
+
+</div>
+
+
+
+<!-- REASON 3 -->
+
+<div class="form-check reason-item">
+
+<input
+    class="form-check-input"
+    type="checkbox"
+    name="modal_reason"
+    value="It is out of stock"
+    id="reason3"
+>
+
+<label
+    class="form-check-label"
+    for="reason3"
+>
+
+It is out of stock
+
+</label>
+
+</div>
+
+
+</div>
+
+
+<br>
+
+
+<!-- OTHER REASON -->
+
+<div class="form-check reason-item">
+
+    <input
+        class="form-check-input"
+        type="checkbox"
+        name="modal_reason"
+        value="Other"
+        id="reasonOther"
+        onchange="toggleOtherReason()"
+    >
+
+    <label
+        class="form-check-label"
+        for="reasonOther"
+    >
+        Other reason
+    </label>
+
+</div>
+
+
+<!-- OTHER REASON TEXT -->
+
+<div
+    id="otherReasonBox"
+    style="display:none;"
+    class="mt-3"
+>
+
+    <label class="form-label">
+        <strong>Write the reason</strong>
+    </label>
+
+    <textarea
+        id="otherReasonText"
+        class="form-control"
+        rows="4"
+        placeholder="Write the reason for rejecting this request..."
+    ></textarea>
+
+</div>
+
+
+
+<!-- MODAL FOOTER -->
+
+<div class="modal-footer">
+
+
+<button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+>
+
+Cancel
+
+</button>
+
+
+
+<button
+    type="button"
+    class="btn btn-danger"
+    onclick="submitRejection()"
+>
+
+<i class="bi bi-x-circle"></i>
+
+Confirm Reject
+
+</button>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- HIDDEN FORM -->
+
+<form
+    method="POST"
+    id="rejectForm"
+    style="display:none;"
+>
+
+{% csrf_token %}
+
+<input
+    type="hidden"
+    name="rejection_message"
+    id="rejectionMessage"
+>
+
+<div id="selectedReasons"></div>
+
+</form>
+
+
+           <!-- VIEW REJECTION REASON -->
+
+<div id="simpleRejectModal" class="simple-modal">
+
+    <div class="simple-modal-box">
+
+        <div class="simple-modal-header">
+
+            <h5>
+                <i class="bi bi-x-circle"></i>
+                Rejection Information
+            </h5>
+
+            <button
+                type="button"
+                onclick="closeRejectReason()"
+                class="simple-close"
+            >
+                &times;
+            </button>
+
+        </div>
+
+
+        <div class="simple-modal-body">
+
+            <p>
+                <strong>Employee:</strong>
+                <span id="simpleRejectEmployee"></span>
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Reason:</strong>
+            </p>
+
+            <div class="simple-reason">
+                <span id="simpleRejectReason"></span>
+            </div>
+
+
+            <p class="mt-3">
+                <strong>Store Keeper Message:</strong>
+            </p>
+
+            <div class="simple-reason">
+                <span id="simpleRejectMessage"></span>
+            </div>
+
+        </div>
+
+
+        <div class="simple-modal-footer">
+
+            <button
+                type="button"
+                class="btn btn-dark"
+                onclick="closeRejectReason()"
+            >
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+
+<footer>
+
+© 2026 Camera Inventory System | Addis Media Network
+
+</footer>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+
+<script>
+
+/* =========================================
+   REJECT REQUEST
+   ========================================= */
+
+let selectedRequestId = null;
+
+
+function setRejectRequest(id, employee) {
+
+    selectedRequestId = id;
+
+    document.getElementById("rejectEmployee").innerText = employee;
+
+    document
+        .querySelectorAll('input[name="modal_reason"]')
+        .forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+
+    document.getElementById("otherReasonText").value = "";
+
+    document.getElementById("otherReasonBox").style.display = "none";
+}
+
+
+function toggleOtherReason() {
+
+    var otherCheckbox =
+        document.getElementById("reasonOther");
+
+    var otherBox =
+        document.getElementById("otherReasonBox");
+
+    if (otherCheckbox.checked) {
+
+        otherBox.style.display = "block";
+
+    } else {
+
+        otherBox.style.display = "none";
+
+        document.getElementById("otherReasonText").value = "";
+    }
+}
+
+
+function submitRejection() {
+
+    var reasons = [];
+
+
+    document
+        .querySelectorAll('input[name="modal_reason"]:checked')
+        .forEach(function(checkbox) {
+
+            if (checkbox.value === "Other") {
+                return;
+            }
+
+            reasons.push(checkbox.value);
+        });
+
+
+    var otherCheckbox =
+        document.getElementById("reasonOther");
+
+    var otherReason =
+        document.getElementById("otherReasonText").value.trim();
+
+
+    if (otherCheckbox.checked) {
+
+        if (otherReason === "") {
+
+            alert("Please write the reason for rejection.");
+
+            return;
+        }
+
+        reasons.push(otherReason);
+    }
+
+
+    if (reasons.length === 0) {
+
+        alert("Please select a reason for rejection.");
+
+        return;
+    }
+
+
+    var selectedReasons =
+        document.getElementById("selectedReasons");
+
+    selectedReasons.innerHTML = "";
+
+
+    reasons.forEach(function(reason) {
+
+        var input =
+            document.createElement("input");
+
+        input.type = "hidden";
+
+        input.name = "reasons";
+
+        input.value = reason;
+
+        selectedReasons.appendChild(input);
+    });
+
+
+    document.getElementById("rejectionMessage").value =
+        "Request rejected by Store Keeper.";
+
+
+    document.getElementById("rejectForm").action =
+        "/reject-request/" + selectedRequestId + "/";
+
+
+    document.getElementById("rejectForm").submit();
+}
+
+
+/* =========================================
+   VIEW REJECTION REASON
+   ========================================= */
+function showDetails(btn) {
+
+    document.getElementById("viewEmployee").innerText =
+        btn.dataset.name || "Unknown employee";
+
+    document.getElementById("viewReason").innerText =
+        btn.dataset.reason || "No specific reason provided.";
+
+    document.getElementById("viewMessage").innerText =
+        btn.dataset.rejectionMessage || "No additional message.";
+
+}
+
+
+/* =========================================
+   CLOSE REJECTION REASON
+   ========================================= */
+
+function closeRejectReason() {
+
+    document
+        .getElementById("simpleRejectModal")
+        .classList.remove("show");
+}
+document.getElementById("simpleRejectModal").addEventListener("click", function(event) {
+
+    if (event.target === this) {
+        closeRejectReason();
+    }
+
+});
+</script>
+</body>
+
+</html>
